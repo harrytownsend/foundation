@@ -65,19 +65,16 @@ class fDate extends Date {
 		switch(format) {
 			case "D":
 				// Suffix depends on the last digit of the day of the month.
-				switch(this.getDate() % 10) {
-					case 1:
-						output = "st";
-						break;
-					case 2:
-						output = "nd";
-						break;
-					case 3:
-						output = "rd";
-						break;
-					default:
-						output = "th";
-						break;
+				const date: number = this.getDate();
+				const lastDigit: number = date % 10;
+				if(lastDigit == 1 && date != 11) {
+					output = "st";
+				} else if(lastDigit == 2 && date != 12) {
+					output = "nd";
+				} else if(lastDigit == 3 && date != 13) {
+					output = "rd";
+				} else {
+					output = "th";
 				}
 				break;
 			case "H":
