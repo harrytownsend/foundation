@@ -277,18 +277,35 @@ class fDate extends Date {
 		return char.charCodeAt(0) >= 48 && char.charCodeAt(0) <= 57;
 	};
 
-	public static parseString(date: string, format: string): fDate {
-		const dateInfo: DateInfo = {
-			year: 1970,
-			month: 0,
-			date: 1,
-			hours: 0,
-			isHour24: true,
-			isHourAM: true,
-			minutes: 0,
-			seconds: 0,
-			milliseconds: 0
-		};
+	public static parseString(date: string, format: string, baseDate?: Date | fDate | null): fDate {
+		let dateInfo: DateInfo;
+		if(baseDate != null) {
+			baseDate = baseDate!;
+			dateInfo = {
+				year: baseDate.getFullYear(),
+				month: baseDate.getMonth(),
+				date: baseDate.getDate(),
+				hours: baseDate.getHours(),
+				isHour24: true,
+				isHourAM: true,
+				minutes: baseDate.getMinutes(),
+				seconds: baseDate.getSeconds(),
+				milliseconds: baseDate.getMilliseconds()
+			}
+		} else {
+			dateInfo = {
+				year: 1970,
+				month: 0,
+				date: 1,
+				hours: 0,
+				isHour24: true,
+				isHourAM: true,
+				minutes: 0,
+				seconds: 0,
+				milliseconds: 0
+			};
+		}
+
 		let formatPosition: number = 0;
 		let datePosition: number = 0;
 
