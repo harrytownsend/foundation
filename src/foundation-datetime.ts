@@ -344,7 +344,26 @@ class fDate extends Date {
 						datePosition += fDate._months[dateInfo.month].length;
 						break;
 					case "P":
-						datePosition += 2;
+					case "p":
+						if(datePosition + 1 > date.length) {
+							throw "Unable identify an AM/PM indicator at location (" + datePosition + ") in the date string.";
+						}
+						dateText = date.substring(datePosition, datePosition + 2).toLowerCase();
+						if(dateText == "am") {
+							dateInfo.isHourAM = true;
+						} else if(dateText == "pm") {
+							dateInfo.isHourAM = false;
+						} else {
+							throw "Unrecognised AM/PM indicator (" + dateText + ") found at position (" + datePosition + ") in the date string.";
+						}
+
+						// An AM/PM indicator implies 12-hour time.
+						dateInfo.isHour24 = false;
+						if(dateInfo.hours >= 12) {
+							dateInfo.hours -= 12;
+						}
+						
+						datePosition += dateText.length;
 						break;
 					case "d":
 					case "dd":
@@ -371,9 +390,6 @@ class fDate extends Date {
 						dateText = fDate._parseSegmentNumber(date, datePosition, formatSegment.length, 2);
 						dateInfo.minutes = parseInt(dateText);
 						datePosition += dateText.length;
-						break;
-					case "p":
-						datePosition += 2;
 						break;
 					case "s":
 					case "ss":
