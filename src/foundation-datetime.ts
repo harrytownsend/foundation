@@ -84,7 +84,7 @@ class fDate extends Date {
 		yyyy - The full year.
 
 		PARSING-ONLY FORMATTING:
-		#    - Represents a while card for any single character in the date string.
+		#    - Represents a wild card for any single character in the date string.
 	*/
 
 	private static _dateFormatSegmentMap: DateFormatSegmentMap = {
