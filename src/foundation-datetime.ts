@@ -525,4 +525,8 @@ class fDate extends Date {
 	private static _parseYear(year: string): number {
 		return parseInt((new Date()).getFullYear().toString().substring(0, 4 - year.length) + year);
 	}
+
+	public toDate(): Date {
+		return new Date(this);
+	}
 }
