@@ -55,6 +55,7 @@ class fDate extends Date {
 
 	private static _formatCharacters: readonly string[] = ['D', 'H', 'M', 'd', 'f', 'h', 'm', 'p', 's', 'y'];
 	/*
+		GENERAL FORMATTING:
 		D    - The suffix appropriate to the date. (e.g. st, nd, rd, ...)
 		H    - The hour in 24-hour time format. No leading zeroes.
 		HH   - The hour in 24-hour time format. Includes leading zero if 1 digit.
@@ -65,6 +66,8 @@ class fDate extends Date {
 		P    - Shows whether the time is "AM" or "PM". (upper case)
 		d    - The day. No leading zeroes.
 		dd   - The day. Includes leading zero if 1 digit.
+		ddd  - A 3 character representation of the weekday. (e.g. Mon, Tue, Wed)
+		dddd - The full name of the weekday. (e.g. Monday, Tuesday, Wednesday)
 		f    - Tenths of a second.
 		ff   - Hundredths of a second.
 		fff  - Thousandths of a second.
@@ -79,6 +82,9 @@ class fDate extends Date {
 		yy   - Last 2 digits of the year.
 		yyy  - Last 3 digits of the year.
 		yyyy - The full year.
+
+		PARSING-ONLY FORMATTING:
+		#    - Represents a while card for any single character in the date string.
 	*/
 
 	private static _dateFormatSegmentMap: DateFormatSegmentMap = {
@@ -92,6 +98,8 @@ class fDate extends Date {
 		"P":	{ type: DateFormatSegmentType.Format, isExplicit: true , isNumeric: false, text: "P"	},
 		"d":	{ type: DateFormatSegmentType.Format, isExplicit: false, isNumeric: true , text: "d"	},
 		"dd":	{ type: DateFormatSegmentType.Format, isExplicit: true , isNumeric: true , text: "dd"	},
+		"ddd":	{ type: DateFormatSegmentType.Format, isExplicit: true , isNumeric: false, text: "ddd"	},
+		"dddd":	{ type: DateFormatSegmentType.Format, isExplicit: true , isNumeric: false, text: "dddd"	},
 		"f":	{ type: DateFormatSegmentType.Format, isExplicit: true , isNumeric: true , text: "f"	},
 		"ff":	{ type: DateFormatSegmentType.Format, isExplicit: true , isNumeric: true , text: "ff"	},
 		"fff":	{ type: DateFormatSegmentType.Format, isExplicit: true , isNumeric: true , text: "fff"	},
@@ -388,6 +396,13 @@ class fDate extends Date {
 						dateInfo.date = parseInt(dateText);
 						datePosition += dateText.length;
 						break;
+					case "ddd":
+						fDate._parseSegmentDOW(date, datePosition, true);
+						datePosition += 3;
+						break;
+					case "dddd":
+						datePosition += fDate._months[fDate._parseSegmentDOW(date, datePosition, false)].length;
+						break;
 					case "f":
 					case "ff":
 					case "fff":
@@ -472,9 +487,20 @@ class fDate extends Date {
 		return output;
 	}
 
+	private static _parseSegmentDOW(text: string, start: number, short: boolean): number {
+		for(let i: number = 0; i < fDate._daysOfWeek.length; i++) {
+			let name: string = ((short) ? fDate._daysOfWeek[i].substring(0, 3) : fDate._daysOfWeek[i]).toLowerCase();
+			if(start + name.length < text.length && name == text.substring(start, start + name.length).toLowerCase()) {
+				return i;
+			}
+		}
+
+		throw "Unable identify a day of week at location (" + start + ") in the date string.";
+	}
+
 	private static _parseSegmentMonth(text: string, start: number, short: boolean): number {
-		for(let i: number = 0; i < 12; i++) {
-			let name: string = ((short) ? this._months[i].substring(0, 3) : this._months[i]).toLowerCase();
+		for(let i: number = 0; i < fDate._months.length; i++) {
+			let name: string = ((short) ? fDate._months[i].substring(0, 3) : fDate._months[i]).toLowerCase();
 			if(start + name.length < text.length && name == text.substring(start, start + name.length).toLowerCase()) {
 				return i;
 			}
