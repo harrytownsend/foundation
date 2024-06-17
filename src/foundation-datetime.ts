@@ -26,7 +26,7 @@ interface DateInfo {
 	milliseconds: number
 }
 
-class fDate extends Date {
+export class fDate extends Date {
 
 	private static _months: readonly string[] = [
 		"January",
