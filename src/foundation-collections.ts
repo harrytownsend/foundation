@@ -1,4 +1,4 @@
-class fList<T> {
+export class fList<T> {
 	private _list: T[];
 
 	constructor(list: T[] | fList<T>) {
