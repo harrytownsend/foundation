@@ -53,7 +53,7 @@ export class fDate extends Date {
 		"Saturday"
 	];
 
-	private static _formatCharacters: readonly string[] = ['D', 'H', 'M', 'd', 'f', 'h', 'm', 'p', 's', 'y'];
+	private static _formatCharacters: readonly string[] = ['D', 'H', 'M', 'P', 'd', 'f', 'h', 'm', 'p', 's', 'y'];
 	/*
 		GENERAL FORMATTING:
 		D    - The suffix appropriate to the date. (e.g. st, nd, rd, ...)
@@ -488,25 +488,29 @@ export class fDate extends Date {
 	}
 
 	private static _parseSegmentDOW(text: string, start: number, short: boolean): number {
-		for(let i: number = 0; i < fDate._daysOfWeek.length; i++) {
-			let name: string = ((short) ? fDate._daysOfWeek[i].substring(0, 3) : fDate._daysOfWeek[i]).toLowerCase();
-			if(start + name.length < text.length && name == text.substring(start, start + name.length).toLowerCase()) {
-				return i;
-			}
+		let index: number = fDate._parseSegmentList(text, start, short, fDate._daysOfWeek);
+		if(index < 0) {
+			throw "Unable identify a day of week at location (" + start + ") in the date string.";
 		}
-
-		throw "Unable identify a day of week at location (" + start + ") in the date string.";
+		return index;
 	}
 
 	private static _parseSegmentMonth(text: string, start: number, short: boolean): number {
-		for(let i: number = 0; i < fDate._months.length; i++) {
-			let name: string = ((short) ? fDate._months[i].substring(0, 3) : fDate._months[i]).toLowerCase();
-			if(start + name.length < text.length && name == text.substring(start, start + name.length).toLowerCase()) {
+		let index: number = fDate._parseSegmentList(text, start, short, fDate._months);
+		if(index < 0) {
+			throw "Unable identify a month at location (" + start + ") in the date string.";
+		}
+		return index;
+	}
+
+	private static _parseSegmentList(text: string, start: number, short: boolean, list: readonly string[]): number {
+		for(let i: number = 0; i < list.length; i++) {
+			let name: string = ((short) ? list[i].substring(0, 3) : list[i]).toLowerCase();
+			if(start + name.length <= text.length && name == text.substring(start, start + name.length).toLowerCase()) {
 				return i;
 			}
 		}
-
-		throw "Unable identify a month at location (" + start + ") in the date string.";
+		return -1;
 	}
 
 	private static _parseSegmentNumber(text: string, start: number, min: number, max: number): string {
