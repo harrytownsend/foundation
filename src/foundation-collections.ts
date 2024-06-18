@@ -19,7 +19,11 @@ export class fList<T> {
 			throw "Insert location ($position) is out of range.";
 		}
 
-		this._list.splice(position, 0, item);
+		if(position < this._list.length) {
+			this._list.splice(position, 0, item);
+		} else {
+			this._list.push(item);
+		}
 	}
 
 	public addAll(itemList: T[] | fList<T>, position: number = this.size()): void {
@@ -108,7 +112,7 @@ export class fList<T> {
 	}
 
 	public push(item: T): void {
-		this.add(item);
+		this._list.push(item);
 	}
 
 	public remove(item: T, all: boolean = false): number {
