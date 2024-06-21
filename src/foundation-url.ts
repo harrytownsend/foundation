@@ -132,7 +132,7 @@ export class fURL {
 			url.substring(startOfQuery + 1).split(pairSeparator).forEach((pair: string) => {
 				const parts: string[] = pair.split("=");
 				const name: string = decodeURIComponent(parts[0]);
-				const value: string = (parts.length > 1) ? decodeURIComponent(parts[1]) : "";
+				const value: string | null = (parts.length > 1) ? decodeURIComponent(parts[1]) : null;
 
 				this.query.set(name, value);
 			});
