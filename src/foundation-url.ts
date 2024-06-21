@@ -155,7 +155,7 @@ export class fURL {
 		}
 
 		startOfPort = url.indexOf(":", startOfDomain);
-		if(startOfPort >= 0 && startOfPort < endOfPort) {
+		if(startOfPort >= 0 && startOfPort < endOfPort - 1) {
 			this.port = parseInt(url.substring(startOfPort + 1, endOfPort));
 			endOfDomain = startOfPort;
 		} else {
