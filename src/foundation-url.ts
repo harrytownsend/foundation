@@ -29,7 +29,7 @@ export class fURL {
 		this._parseURL(url);
 	}
 
-	constructor(url?: string) {
+	constructor(url: string | null = null) {
 		if(url != null) {
 			this._parseURL(url);
 		}
@@ -92,12 +92,89 @@ export class fURL {
 	}
 
 	public isValid(): boolean {
-		if(this.protocol == null) {
+		try {
+			if(
+				   (this.protocol == null || !fURL.isValidProtocolName(this.protocol))
+				|| (this.domain.length == 0 || !fURL.isValidDomainPath(this.domain))
+				|| (this.port != null && !fURL.isValidPortNumber(this.port))
+				|| (this.directory.length != 0 && !fURL.isValidFilePath(this.directory))
+				|| (this.file != null && !fURL.isValidFileName(this.file))
+			) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch(e) {
+			return false;
+		}
+	}
+
+	public static isValidProtocolName(protocol: string): boolean {
+		if(typeof protocol != "string" || protocol.length == 0) {
 			return false;
 		}
 
-		if(this.domain.length == 0) {
+		return fURL.isValidStringContent(protocol, false, true, true, ['+', '.', '-']);	
+	}
+
+	public static isValidDomainName(domain: string): boolean {
+		if(typeof domain != "string" || domain.length == 0) {
 			return false;
+		}
+
+		return fURL.isValidStringContent(domain, false, true, false, ['-']);
+	}
+
+	public static isValidDomainPath(domainPath: string | string[]): boolean {
+		const pathSegments: string[] = (typeof domainPath == "string") ? domainPath.split('.') : domainPath;
+		for(let i: number = 0; i < pathSegments.length; i++) {
+			if(!fURL.isValidDomainName(pathSegments[i])) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public static isValidPortNumber(port: number): boolean {
+		if(typeof port != "number") {
+			return false;
+		}
+
+		return port > 0 && port <= 65535;
+	}
+
+	public static isValidFileName(file: string): boolean {
+		if(typeof file != "string" || file.length == 0) {
+			return false;
+		}
+
+		return fURL.isValidStringContent(file, true, true, true, ['.', '_', '-']);
+	}
+
+	public static isValidFilePath(filePath: string | string[]): boolean {
+		const pathSegments: string[] = (typeof filePath == "string") ? filePath.split('/') : filePath;
+		for(let i: number = 0; i < pathSegments.length; i++) {
+			if(!fURL.isValidFileName(pathSegments[i])) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private static isValidStringContent(input: string, allowAlphaUpper: boolean, allowAlphaLower: boolean, allowNum: boolean, allowChars: string[]): boolean {
+		for(let i: number = 0; i < input.length; i++) {
+			const char = input.charAt(i);
+			const charCode = input.charCodeAt(i);
+			if(!(
+				   (allowAlphaUpper && charCode >= 65 && charCode <= 90)
+				|| (allowAlphaLower && charCode >= 97 && charCode <= 122)
+				|| (allowNum && charCode >= 48 && charCode <= 57)
+				|| allowChars.indexOf(char) >= 0
+			)) {
+				return false;
+			}
 		}
 
 		return true;
