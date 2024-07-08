@@ -16,8 +16,17 @@ export class fMutex {
 			waiting.reject = reject;
 			this._queue.push(waiting);
 		}).then(
-			() => { success = true; },
-			() => { success = false; }
+			() => {
+				success = true;
+			},
+			() => {
+				success = false;
+
+				const i = this._queue.indexOf(waiting);
+				if(i >= 0) {
+					this._queue.splice(i, 1);
+				}
+			}
 		);
 
 		if(this.queue == 1) {
@@ -26,11 +35,6 @@ export class fMutex {
 			if(timeout > 0) {
 				setTimeout(() => {
 					waiting.reject!();
-
-					const i = this._queue.indexOf(waiting);
-					if(i >= 0) {
-						this._queue.splice(i, 1);
-					}
 				}, timeout);
 			}
 		}
