@@ -1,8 +1,7 @@
 interface fMutexWaiting {
 	resolve?: Function,
 	reject?: Function,
-	promise?: Promise<void>,
-	complete: boolean
+	promise?: Promise<void>
 }
 
 export class fMutex {
@@ -11,9 +10,7 @@ export class fMutex {
 	public async acquire(timeout: number = -1): Promise<Function | null> {
 		let success;
 
-		const waiting: fMutexWaiting = {
-			complete: false
-		};
+		const waiting: fMutexWaiting = {};
 		waiting.promise = new Promise((resolve, reject) => {
 			waiting.resolve = resolve;
 			waiting.reject = reject;
@@ -29,6 +26,11 @@ export class fMutex {
 			if(timeout > 0) {
 				setTimeout(() => {
 					waiting.reject!();
+
+					const i = this._queue.indexOf(waiting);
+					if(i >= 0) {
+						this._queue.splice(i, 1);
+					}
 				}, timeout);
 			}
 		}
@@ -39,25 +41,17 @@ export class fMutex {
 				this.release();
 			};
 		} else {
-			waiting.complete = true;
 			return null;
 		}
 	}
 
-	public get locked() { return this._queue.length > 0 }
-	public get queue() { return this._queue.length; }
+	public get locked(): boolean { return this._queue.length > 0 }
+	public get queue(): number { return this._queue.length; }
 
 	public async release(): Promise<void> {
 		const current: fMutexWaiting = this._queue.shift()!;
-
-		while(this.locked) {
-			const next: fMutexWaiting = this._queue[0];
-			if(next.complete) {
-				this._queue.shift();
-			} else {
-				next.resolve!();
-				return;
-			}
+		if(this.locked) {
+			this._queue[0].resolve!();
 		}
 	}
 }
