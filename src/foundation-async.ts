@@ -49,6 +49,21 @@ export class fMutex {
 		}
 	}
 
+	public async acquireWith(success: Function | null, failure: Function | null, timeout: number =-1): Promise<void> {
+		const mutex: Function | null = await this.acquire(timeout);
+
+		if(mutex) {
+			if(typeof success == "function") {
+				await success();
+			}
+			mutex();
+		} else {
+			if(typeof failure == "function") {
+				await failure();
+			}
+		}
+	}
+
 	public get locked(): boolean { return this._queue.length > 0 }
 	public get queue(): number { return this._queue.length; }
 
