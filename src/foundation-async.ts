@@ -82,11 +82,13 @@ export class fInterval {
 
 	private _callback: Function;
 	private _interval: number;
+	private _serial: boolean;
 	private _spaced: boolean;
 
-	constructor(callback: Function, interval: number, spaced: boolean = true) {
+	constructor(callback: Function, interval: number, serial: boolean = true, spaced: boolean = true) {
 		this._callback = callback;
 		this._interval = interval;
+		this._serial = serial;
 		this._spaced = spaced;
 
 		this.start();
@@ -97,6 +99,7 @@ export class fInterval {
 	public get interval(): number { return this._interval; }
 	public get locked(): boolean { return this._locked; }
 	public get lastTick(): Date { return new Date(this._lastTick); }
+	public get serial(): boolean { return this._serial; }
 	public get spaced(): boolean { return this._spaced; }
 
 	public start(): void {
@@ -115,10 +118,15 @@ export class fInterval {
 		while(this._active) {
 			this._lastTick = new Date();
 
-			this._locked = true;
-			await this._callback();
-			this._locked = false;
-
+			if(this._serial) {
+				this._locked = true;
+				await this._callback();
+				this._locked = false;
+			} else {
+				(async () => {
+					this.callback();
+				})();
+			}
 			
 			if(this._active) {
 				if(this._spaced) {
