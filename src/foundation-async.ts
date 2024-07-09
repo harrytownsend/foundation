@@ -82,6 +82,7 @@ export class fInterval {
 
 	private _callback: Function;
 	private _interval: number;
+	private _remaining: number = 0;
 	private _serial: boolean;
 	private _spaced: boolean;
 
@@ -90,8 +91,6 @@ export class fInterval {
 		this._interval = interval;
 		this._serial = serial;
 		this._spaced = spaced;
-
-		this.start();
 	}
 
 	public get active(): boolean { return this._active; }
@@ -99,15 +98,19 @@ export class fInterval {
 	public get interval(): number { return this._interval; }
 	public get locked(): boolean { return this._locked; }
 	public get lastTick(): Date { return new Date(this._lastTick); }
+	public get remaining(): number { return this._remaining; }
 	public get serial(): boolean { return this._serial; }
 	public get spaced(): boolean { return this._spaced; }
 
-	public start(): void {
+	public start(count: number = 0): fInterval {
 		this._active = true;
+		this._remaining = count;
 
 		if(!this._locked) {
 			this._tick();
 		}
+
+		return this;
 	}
 
 	public stop(): void {
@@ -115,17 +118,25 @@ export class fInterval {
 	}
 
 	private async _tick(): Promise<void> {
+		this._locked = true;
+
 		while(this._active) {
 			this._lastTick = new Date();
 
 			if(this._serial) {
-				this._locked = true;
 				await this._callback();
-				this._locked = false;
 			} else {
 				(async () => {
 					this.callback();
 				})();
+			}
+
+			// If we are running for a specific number of times, reduce the count by 1. If we reach 0, stop.
+			if(this._remaining > 0) {
+				this._remaining--;
+				if(this._remaining == 0) {
+					this._active = false;
+				}
 			}
 			
 			if(this._active) {
@@ -139,6 +150,8 @@ export class fInterval {
 				}
 			}
 		}
+
+		this._locked = false;
 	}
 
 	private async _sleep(millis: number): Promise<void> {
