@@ -61,7 +61,7 @@ export function overload(args: object[]): void {
 	for(let i = 1; i < arguments.length; i++) {
 		let argument = arguments[i];
 		if(typeof argument == "function") {
-			if(match || (i + 1 == arguments.length && arguments.length >= 3 && typeof arguments[i - 1] == "function")) {
+			if(match || (i + 1 == arguments.length && ((arguments.length == 2) || (arguments.length >= 3 && typeof arguments[i - 1] == "function")))) {
 				argument(...args);
 				return;
 			}
